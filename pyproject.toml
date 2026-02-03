@@ -1,0 +1,29 @@
+[project]
+name = "app-secunda"
+version = "0.1.0"
+description = "test REST-api app for secunda"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.18.3",
+    "asyncpg>=0.31.0",
+    "fastapi[standard]>=0.128.0",
+    "sqlalchemy[asyncpg]>=2.0.46",
+    "structlog>=25.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
+
+[tool.pyrefly]
+project-includes = ["./src/handbook/"]
+project-excludes = ["**/.[!/.]*", "**/tests"]
+search-path = ["src/handbook"]
+site-package-path = [".venv/lib/python3.*/site-packages"]
+python-platform = "linux"
+
+[tool.pytest.ini_options]
+pythonpath = ["src/handbook"]
+

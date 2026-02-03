@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.pytest_cache
+
+# Virtual environments
+.venv
+
+# Local dev files
+pyrefly.toml
+docs/
+tests/
+scripts/init_db.sh
+scripts/tree.sh
+.env

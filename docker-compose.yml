@@ -1,0 +1,43 @@
+services:
+  test_task_db:
+    image: postgres:15
+    container_name: test_task_db 
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+       - ./scripts/db_scripts/01_db_init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro 
+    command: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  handbook:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: handbook
+    ports:
+      - "${APP_PORT}:${APP_CONTAINER_PORT}"
+    environment:
+      - DATABASE_URL=${DB_TYPE}+${DB_SCHEME}://${DB_USER}:${DB_PASSWORD}@test_task_db:5432/${DB_NAME}
+      - LOG_LEVEL=INFO
+    depends_on:
+      test_task_db: 
+          condition: service_healthy
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
