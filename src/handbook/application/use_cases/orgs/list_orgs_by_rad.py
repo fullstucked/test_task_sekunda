@@ -18,7 +18,7 @@ class ListOrganizationsInRadiusUseCase:
         center = Coordinates(lat=lat, lon=lon)
         facilities = await self._facility_repo.list_in_radius(center, radius_meters)
 
-        orgs: list = []
+        orgs = []
         for facility in facilities:
             orgs.extend(await self._org_repo.list_by_facility(facility))
 

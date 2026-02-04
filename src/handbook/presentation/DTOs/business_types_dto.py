@@ -1,5 +1,4 @@
 from uuid import UUID
-
 from pydantic import BaseModel, Field
 
 
@@ -7,12 +6,12 @@ class BusinessTypeTreeDTO(BaseModel):
     id: UUID = Field(
         ...,
         description="Business type ID.",
-        example="bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+        json_schema_extra={"example": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"},
     )
     name: str = Field(
         ...,
         description="Business type name.",
-        example="Food Service",
+        json_schema_extra={"example": "Food Service"},
     )
     children: list["BusinessTypeTreeDTO"] = Field(
         default_factory=list,
@@ -32,22 +31,22 @@ class BusinessTypeHierarchyDTO(BaseModel):
     id: UUID = Field(
         ...,
         description="Business type ID.",
-        example="cccccccc-cccc-cccc-cccc-cccccccccccc",
+        json_schema_extra={"example": "cccccccc-cccc-cccc-cccc-cccccccccccc"},
     )
     name: str = Field(
         ...,
         description="Business type name.",
-        example="Retail",
+        json_schema_extra={"example": "Retail"},
     )
     parent_id: UUID | None = Field(
         None,
         description="Parent business type ID, if any.",
-        example=None,
+        json_schema_extra={"example": None},
     )
     children_ids: list[UUID] = Field(
         ...,
         description="List of child business type IDs.",
-        example=["dddddddd-dddd-dddd-dddd-dddddddddddd"],
+        json_schema_extra={"example": ["dddddddd-dddd-dddd-dddd-dddddddddddd"]},
     )
 
     @staticmethod
@@ -64,17 +63,17 @@ class BusinessTypeDTO(BaseModel):
     id: UUID = Field(
         ...,
         description="Unique identifier of the business type.",
-        example="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+        json_schema_extra={"example": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"},
     )
     name: str = Field(
         ...,
         description="Name of the business type.",
-        example="Restaurant",
+        json_schema_extra={"example": "Restaurant"},
     )
     parent_id: UUID | None = Field(
         None,
         description="Parent business type ID, if any.",
-        example=None,
+        json_schema_extra={"example": None},
     )
 
     @staticmethod

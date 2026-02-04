@@ -6,7 +6,6 @@ import sys
 from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 
-# Explicitly add potential project root paths
 project_roots = ["/app", "/app/src", "/src", "/src/handbook"]
 for root in project_roots:
     if root not in sys.path:
@@ -14,10 +13,12 @@ for root in project_roots:
 config = context.config
 
 from src.handbook.infra.db import Base
+
 target_metadata = Base.metadata
 
 config = context.config
 config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
@@ -32,6 +33,7 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+
 def do_run_migrations(connection):
     context.configure(connection=connection, target_metadata=target_metadata)
     with context.begin_transaction():
@@ -43,7 +45,9 @@ async def run_migrations_online():
     In this scenario we need to create an Engine
     and associate a connection with the context.
     """
-    connectable = create_async_engine(os.getenv("DATABASE_URL"), echo=False, future=True)
+    connectable = create_async_engine(
+        os.getenv("DATABASE_URL"), echo=False, future=True
+    )
 
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)

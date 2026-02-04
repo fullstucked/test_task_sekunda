@@ -21,15 +21,11 @@ class ListOrganizationsInRectangleUseCase:
         lat2: Decimal,
         lon2: Decimal,
     ):
-        """
-        p1 and p2 are two opposite corners of the rectangle.
-        Each is a Coordinate or (lat, lon) tuple.
-        """
-        p1: Coordinates = Coordinates(lat=lat1, lon=lon1)
-        p2: Coordinates = Coordinates(lat=lat2, lon=lon2)
+        p1 = Coordinates(lat=lat1, lon=lon1)
+        p2 = Coordinates(lat=lat2, lon=lon2)
+
         facilities = await self.facility_repo.list_in_rectangle(p1=p1, p2=p2)
 
-        # collect organizations
         orgs = []
         for facility in facilities:
             orgs.extend(await self.org_repo.list_by_facility(facility))

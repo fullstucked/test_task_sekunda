@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Iterable, Optional
+from typing import Sequence
 
 from domain.entities.business_type import BusinessType
 from domain.entities.facility import Facility
@@ -11,81 +11,54 @@ from domain.val_objs.ids import OrganizationId
 
 class OrganizationRepository(ABC):
     """
-    Repository interface for Organization aggregate.
-    Defines all queries required by the domain and application use cases.
-    Follows DDD principles of separation of concerns and persistence ignorance.
+    Repository interface for the Organization aggregate.
+    Persistence-agnostic, domain-focused.
     """
 
-    @abstractmethod
-    async def get_by_id(self, id: OrganizationId) -> Optional[Organization]:
-        """
-        Retrieve an organization by its unique identifier.
+    # ---------------------------------------------------------
+    # CRUD
+    # ---------------------------------------------------------
 
-        :param id_: Unique organization identifier
-        :return: Organization instance or None if not found
+    @abstractmethod
+    async def get_by_id(self, id: OrganizationId) -> Organization:
         """
-        pass
+        Retrieve an organization by ID.
+        Raises DomainResourceNotFoundError if not found.
+        """
+        raise NotImplementedError
 
     @abstractmethod
     async def save(self, organization: Organization) -> None:
-        """
-        Persist a new or updated organization.
-
-        :param organization: Organization to save
-        """
-        pass
+        """Persist a new or updated organization."""
+        raise NotImplementedError
 
     @abstractmethod
     async def delete(self, organization: Organization) -> None:
-        """
-        Remove an existing organization.
+        """Delete an organization."""
+        raise NotImplementedError
 
-        :param organization: Organization to delete
-        """
-        pass
-
-    # --- Domain-specific query methods as per requirements ---
+    # ---------------------------------------------------------
+    # Domain-specific queries
+    # ---------------------------------------------------------
 
     @abstractmethod
-    async def list_by_facility(self, facility: Facility) -> Iterable[Organization]:
-        """
-        Retrieve all organizations located in a specific facility.
-
-        :param facility: Facility to search organizations in
-        :return: Iterable of organizations in the facility
-        """
-        pass
+    async def list_by_facility(self, facility: Facility) -> Sequence[Organization]:
+        """Organizations located in a specific facility."""
+        raise NotImplementedError
 
     @abstractmethod
-    async def list_by_business_type(self, bt: BusinessType) -> Iterable[Organization]:
-        """
-        Retrieve organizations with a specific business type.
-        Supports first-level business type matching.
-
-        :param bt: Business type to search for
-        :return: Iterable of organizations with the business type
-        """
-        pass
+    async def list_by_business_type(self, bt: BusinessType) -> Sequence[Organization]:
+        """Organizations with a specific business type (non-recursive)."""
+        raise NotImplementedError
 
     @abstractmethod
-    async def list_by_business_types(
-        self, types: Iterable[BusinessType]
-    ) -> Iterable[Organization]:
-        """
-        Retrieve organizations matching ANY of the given business types.
-        Supports recursive search through business type hierarchy.
-
-        :param types: Business types to search for
-        :return: Iterable of organizations matching the types
-        """
-        pass
+    async def list_by_any_business_type(
+        self, types: Sequence[BusinessType]
+    ) -> Sequence[Organization]:
+        """Organizations matching ANY of the given business types."""
+        raise NotImplementedError
 
     @abstractmethod
-    async def search_by_name(self, query: str) -> Iterable[Organization]:
-        """
-        Perform case-insensitive substring search on organization names.
-
-        :param query: Search query string
-        :return: Iterable of organizations matching the name
-        """
-        pass
+    async def search_by_name(self, query: str) -> Sequence[Organization]:
+        """Case-insensitive substring search."""
+        raise NotImplementedError

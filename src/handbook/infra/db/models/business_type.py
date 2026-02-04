@@ -13,7 +13,6 @@ class BusinessTypeModel(Base):
     __table_args__ = (
         UniqueConstraint("parent_id", "name"),
         Index("ix_business_type_parent", "parent_id"),
-        # {'extend_existing': True}
     )
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4

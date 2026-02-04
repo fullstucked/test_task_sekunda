@@ -37,12 +37,6 @@ async def search_by_name(
 ):
     orgs = await uc.execute(q.q)
 
-    if not orgs:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No organizations found",
-        )
-
     return [OrganizationDTO.from_domain(o) for o in orgs]
 
 
@@ -66,12 +60,6 @@ async def list_by_facility(
     uc=Depends(list_orgs_by_facility_uc),
 ):
     orgs = await uc.execute(facility_id)
-
-    if not orgs:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No organizations found for this facility",
-        )
 
     return [OrganizationDTO.from_domain(o) for o in orgs]
 
@@ -98,12 +86,6 @@ async def list_by_business_type_recursive(
     uc=Depends(list_orgs_by_bt_rec_uc),
 ):
     orgs = list(set(await uc.execute(bt_id)))
-
-    if not orgs:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No organizations found for this business type",
-        )
 
     return [OrganizationDTO.from_domain(o) for o in orgs]
 
@@ -132,12 +114,6 @@ async def search_in_proximity(
         lon=q.lon,
         radius_meters=q.radius_meters,
     )
-
-    if not orgs:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No organizations found in this radius",
-        )
 
     return [OrganizationDTO.from_domain(o) for o in orgs]
 
@@ -168,12 +144,6 @@ async def list_orgs_in_rectangle(
         lon2=rect.lon2,
     )
 
-    if not orgs:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No organizations found in this area",
-        )
-
     return [OrganizationDTO.from_domain(o) for o in orgs]
 
 
@@ -195,11 +165,5 @@ async def get_org_by_id(
     uc=Depends(get_org_by_id_uc),
 ):
     org = await uc.execute(org_id)
-
-    if org is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Organization not found",
-        )
 
     return OrganizationDTO.from_domain(org)

@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from domain.entities.base import Entity
 from domain.exceptions.business_type_err import (
     BusinessTypeError,
@@ -17,6 +15,8 @@ class BusinessType(Entity[BusinessTypeId]):
     Example: Retail -> Clothing -> Sportswear
     """
 
+    MAX_DEPTH = 3
+
     def __init__(
         self,
         id_: BusinessTypeId,
@@ -25,148 +25,136 @@ class BusinessType(Entity[BusinessTypeId]):
         children: list[BusinessType] | None = None,
     ) -> None:
         super().__init__(id_=id_)
-
         self.name = name
-        self.parent = parent
-        self.children = children or []
 
-        self._validate_no_cycles()
-        self._validate_depth()
+        self._parent = None
+        self._children: list[BusinessType] = []
+
+        if parent:
+            self.set_parent(parent)
+
+        if children:
+            for child in children:
+                self.add_child(child)
+
+        self._validate_invariants()
+
+    # ---------------------------------------------------------
+    # Properties
+    # ---------------------------------------------------------
+
+    @property
+    def parent(self) -> BusinessType | None:
+        return self._parent
+
+    @property
+    def children(self) -> tuple[BusinessType, ...]:
+        return tuple(self._children)
 
     # ---------------------------------------------------------
     # Parent / Child Management
     # ---------------------------------------------------------
 
     def add_child(self, child: BusinessType) -> None:
-        """Attach a child to this business type."""
         if child is self:
             raise BusinessTypeHierarchyError("BusinessType cannot be its own child")
 
-        if self._creates_cycle(child):
+        if child.is_ancestor_of(self):
             raise BusinessTypeHierarchyError("Hierarchy cycle detected")
 
-        if child in self.children:
+        if child in self._children:
             raise BusinessTypeError("Child already added")
 
         # detach from previous parent
-        if child.parent and child.parent is not self:
-            child.parent.remove_child(child)
+        if child._parent and child._parent is not self:
+            child._parent.remove_child(child)
 
-        self.children.append(child)
-        child.parent = self
+        self._children.append(child)
+        child._parent = self
+
+        self._validate_invariants()
 
     def remove_child(self, child: BusinessType) -> None:
-        """Detach a child from this business type."""
-        if child not in self.children:
+        if child not in self._children:
             raise BusinessTypeError("Child not found")
 
-        self.children.remove(child)
-        child.parent = None
+        self._children.remove(child)
+        child._parent = None
+
+        self._validate_invariants()
 
     def set_parent(self, new_parent: BusinessType | None) -> None:
-        """Reassign parent (safe, cycle‑checked)."""
         if new_parent is self:
             raise BusinessTypeHierarchyError("BusinessType cannot be its own parent")
 
-        if new_parent and new_parent._creates_cycle(self):
+        if new_parent and self.is_ancestor_of(new_parent):
             raise BusinessTypeHierarchyError("Hierarchy cycle detected")
 
         # detach from old parent
-        if self.parent:
-            self.parent.remove_child(self)
+        if self._parent:
+            self._parent.remove_child(self)
 
-        self.parent = new_parent
+        self._parent = new_parent
 
         if new_parent:
-            new_parent.children.append(self)
+            new_parent._children.append(self)
+
+        self._validate_invariants()
 
     # ---------------------------------------------------------
     # Hierarchy Queries
     # ---------------------------------------------------------
 
     def is_descendant_of(self, other: BusinessType) -> bool:
-        current = self.parent
+        current = self._parent
         while current:
             if current is other:
                 return True
-            current = current.parent
+            current = current._parent
         return False
 
     def is_ancestor_of(self, other: BusinessType) -> bool:
         return other.is_descendant_of(self)
 
     def root(self) -> BusinessType:
-        """Return the topmost ancestor."""
         current = self
-        while current.parent:
-            current = current.parent
+        while current._parent:
+            current = current._parent
         return current
 
-    def children_names(self) -> list[str]:
-        return [child.name.value for child in self.children]
-
     def get_recursive_business_types(self) -> list[BusinessType]:
-        """
-        Returns all business types, including descendants.
-        Useful for comprehensive business type searching.
-        """
-
-        def collect_descendants(bt: BusinessType) -> list[BusinessType]:
-            descendants = [bt]
-            for child in bt.children:
-                descendants.extend(collect_descendants(child))
-            return descendants
-
-        return collect_descendants(self)
+        result = [self]
+        for child in self._children:
+            result.extend(child.get_recursive_business_types())
+        return result
 
     # ---------------------------------------------------------
     # Invariants
     # ---------------------------------------------------------
-    def _creates_cycle(self, candidate: Optional[BusinessType]) -> bool:
-        """
-        Detect if adding the candidate as a parent would create a cycle.
-        Args:
-            candidate: The potential parent BusinessType to check
-        Returns:
-            bool: True if adding the candidate would create a cycle, False otherwise
-        """
-        if candidate is None:
-            return False
 
-        # Self can't be its own parent or ancestor
-        if candidate is self:
-            return True
-
-        # Traverse up the parent chain
-        current: Optional[BusinessType] = self
-        while current is not None:
-            if current is candidate:
-                return True
-            current = current.parent
-
-        return False
+    def _validate_invariants(self) -> None:
+        self._validate_no_cycles()
+        self._validate_depth()
 
     def _validate_no_cycles(self) -> None:
-        """Validate hierarchy on initialization."""
-        if self.parent and self._creates_cycle(self.parent):
+        if self._parent and self.is_ancestor_of(self._parent):
             raise BusinessTypeHierarchyError("Invalid hierarchy: cycle detected")
 
     def _validate_depth(self) -> None:
-        """Ensure business type hierarchy does not exceed 3 levels."""
+        for bt in self.get_recursive_business_types():
+            if bt._depth() >= self.MAX_DEPTH:
+                raise BusinessTypeHierarchyError(
+                    "Maximum hierarchy depth exceeded",
+                    context={
+                        "business_type": bt.name.value,
+                        "depth": bt._depth(),
+                    },
+                )
 
-        def get_depth(bt: BusinessType) -> int:
-            depth = 0
-            current = bt
-            while current.parent:
-                depth += 1
-                current = current.parent
-            return depth
-
-        if get_depth(self) >= 3:
-            raise BusinessTypeHierarchyError(
-                "Maximum hierarchy depth of 3 levels exceeded",
-                context={
-                    "current_depth": get_depth(self),
-                    "business_type": self.name.value,
-                },
-            )
+    def _depth(self) -> int:
+        depth = 0
+        current = self._parent
+        while current:
+            depth += 1
+            current = current._parent
+        return depth

@@ -6,4 +6,4 @@ class SearchOrganizationByNameUseCase:
         self._org_repo = org_repo
 
     async def execute(self, query: str):
-        return list(await self._org_repo.search_by_name(query))
+        return await self._org_repo.search_by_name(query)

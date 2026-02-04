@@ -1,8 +1,12 @@
 from collections.abc import Hashable
-from typing import Any, Self, cast
+from typing import Any, Generic, Hashable, Self, TypeVar, cast  # noqa: F811
+
+from domain.events.base import DomainEvent
+
+T = TypeVar("T", bound=Hashable)
 
 
-class Entity[T: Hashable]:
+class Entity(Generic[T]):
     """
     Base class for domain entities, defined by a unique identity (`id`).
     Subclassing is optional;
@@ -17,6 +21,13 @@ class Entity[T: Hashable]:
 
     def __init__(self, *, id_: T) -> None:
         self.id_ = id_
+        self._events: list[DomainEvent] = []
+    def __post_init__(self):
+        ...
+
+    @property
+    def id(self) -> T:
+        return self.id_
 
     def __setattr__(self, name: str, value: Any) -> None:
         """
@@ -43,4 +54,20 @@ class Entity[T: Hashable]:
         return hash((type(self), self.id_))
 
     def __repr__(self) -> str:
-        return f"{type(self).__name__}(id_={self.id_!r})"
+        return f"<{type(self).__name__}(id_={self.id_!r})>"
+    # ---------------------------------------------------------
+    # Domain Events
+    # ---------------------------------------------------------
+
+    def record_event(self, event: DomainEvent) -> None:
+        """Record a domain event that occurred inside this entity."""
+        self._events.append(event)
+
+    def pull_events(self) -> list[DomainEvent]:
+        """
+        Return and clear all recorded events.
+        Called by the application layer after a use case completes.
+        """
+        events = self._events.copy()
+        self._events.clear()
+        return events

@@ -23,5 +23,4 @@ async def get_bt_repo(
         repo = BusinessTypeRepositoryImpl(session)
         return repo
     except Exception as e:
-        # Properly re-raise the exception
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        raise e

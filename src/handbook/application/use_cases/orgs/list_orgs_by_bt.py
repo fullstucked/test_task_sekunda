@@ -18,8 +18,5 @@ class ListOrganizationsByBusinessTypeUseCase:
 
     async def execute(self, bt_id: UUID) -> Iterable[Organization]:
         bt_vo_id = BusinessTypeId(bt_id)
-        bt = await self._bt_repo.get_by_id(bt_vo_id)
-        if bt is None:
-            raise ValueError(f"BusinessType {bt_id} does not exist")
-
+        bt = await self._bt_repo.get_by_id(bt_vo_id)  
         return await self._org_repo.list_by_business_type(bt)

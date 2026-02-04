@@ -11,4 +11,4 @@ class GetBusinessTypeByIdUseCase:
     async def execute(self, bt_id: UUID):
         bt_id_vo = BusinessTypeId(bt_id)
 
-        return await self._bt_repo.get_by_id(id_=bt_id_vo)
+        return await self._bt_repo.get_by_id(id=bt_id_vo)

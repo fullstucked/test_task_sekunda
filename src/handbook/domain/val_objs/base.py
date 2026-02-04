@@ -20,24 +20,34 @@ class ValueObject:
             raise TypeError(f"{cls.__name__} must have at least one field!")
         return object.__new__(cls)
 
-    def __repr__(self) -> str:
-        """
-        Return string representation of value object.
-        - With 1 field: outputs the value only.
-        - With 2+ fields: outputs in `name=value` format.
-        Subclasses must set `repr=False` for this to take effect.
-        """
-        return f"{type(self).__name__}({self.__repr_value()})"
+    def __post_init__(self) -> None:
+        # Ensure subclass has fields
+        if not fields(self):
+            raise TypeError(f"{type(self).__name__} must define at least one field")
 
-    def __repr_value(self) -> str:
-        """
-        Build string representation of value object.
-        - If one field, returns its value.
-        - Otherwise, returns comma-separated list of `name=value` pairs.
-        """
+        # Ensure all fields are immutable
+        for f in fields(self):
+            value = getattr(self, f.name)
+            if self._is_mutable(value):
+                raise TypeError(
+                    f"Field '{f.name}' in {type(self).__name__} must be immutable, "
+                    f"got {type(value).__name__}"
+                )
+
+    @staticmethod
+    def _is_mutable(value: Any) -> bool:
+        """Detect mutable types."""
+        return isinstance(value, (list, dict, set, bytearray))
+
+    def __repr__(self) -> str:
         items = [f for f in fields(self) if f.repr]
         if not items:
-            return "<hidden>"
+            return f"{type(self).__name__}(<hidden>)"
         if len(items) == 1:
-            return f"{getattr(self, items[0].name)!r}"
-        return ", ".join(f"{f.name}={getattr(self, f.name)!r}" for f in items)
+            f = items[0]
+            return f"{type(self).__name__}({getattr(self, f.name)!r})"
+        return (
+            f"{type(self).__name__}("
+            + ", ".join(f"{f.name}={getattr(self, f.name)!r}" for f in items)
+            + ")"
+        )

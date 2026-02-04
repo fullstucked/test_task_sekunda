@@ -1,3 +1,4 @@
+from decimal import Decimal
 from domain.exceptions.base import DomainError, DomainInvariantError
 
 
@@ -47,7 +48,7 @@ class InvalidCoordinatesError(CoordinatesError):
     Provides detailed context about coordinate validation failure.
     """
 
-    def __init__(self, latitude: float, longitude: float, reason: str):
+    def __init__(self, latitude: Decimal, longitude: Decimal, reason: str):
         super().__init__(
             f"Invalid coordinates: {latitude}, {longitude}",
             context={"latitude": latitude, "longitude": longitude, "reason": reason},

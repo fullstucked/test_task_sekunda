@@ -12,20 +12,18 @@ class FacilityMapper:
     def to_domain(model: FacilityModel) -> Facility:
         return Facility(
             id_=FacilityId(model.id),
-            address=Address(
-                address=model.address,
-            ),
+            address=Address(model.address),
             coordinates=Coordinates(
-                lat=Decimal(str(model.lat)),
-                lon=Decimal(str(model.lon)),
+                lat=Decimal(model.lat),
+                lon=Decimal(model.lon),
             ),
         )
 
     @staticmethod
     def to_model(entity: Facility) -> FacilityModel:
         return FacilityModel(
-            id=entity.id_.value,
+            id=entity.id.value,
             address=entity.address.address,
-            lat=float(entity.coordinates.lat),
-            lon=float(entity.coordinates.lon),
+            lat=str(entity.coordinates.lat),
+            lon=str(entity.coordinates.lon),
         )

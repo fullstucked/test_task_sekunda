@@ -20,18 +20,29 @@ class Facility(Entity[FacilityId]):
         coordinates: Coordinates,
     ) -> None:
         super().__init__(id_=id_)
-        self.address = address
-        self.coordinates = coordinates
+        self._address = address
+        self._coordinates = coordinates
 
         self._validate_invariants()
+
+    # ---------------------------------------------------------
+    # Properties (read-only)
+    # ---------------------------------------------------------
+
+    @property
+    def address(self) -> Address:
+        return self._address
+
+    @property
+    def coordinates(self) -> Coordinates:
+        return self._coordinates
 
     # ---------------------------------------------------------
     # Address
     # ---------------------------------------------------------
 
     def update_address(self, new_address: Address) -> None:
-        """Replace the facility's address."""
-        self.address = new_address
+        self._address = new_address
         self._validate_invariants()
 
     # ---------------------------------------------------------
@@ -39,8 +50,7 @@ class Facility(Entity[FacilityId]):
     # ---------------------------------------------------------
 
     def update_coordinates(self, new_coords: Coordinates) -> None:
-        """Replace the facility's coordinates."""
-        self.coordinates = new_coords
+        self._coordinates = new_coords
         self._validate_invariants()
 
     # ---------------------------------------------------------
@@ -48,8 +58,8 @@ class Facility(Entity[FacilityId]):
     # ---------------------------------------------------------
 
     def _validate_invariants(self) -> None:
-        if self.address is None:
+        if self._address is None:
             raise FacilityInvariantError("Facility must have an address")
 
-        if self.coordinates is None:
+        if self._coordinates is None:
             raise FacilityInvariantError("Facility must have coordinates")

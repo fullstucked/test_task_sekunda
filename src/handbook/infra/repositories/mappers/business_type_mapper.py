@@ -7,25 +7,23 @@ from infra.db.models.business_type import BusinessTypeModel
 class BusinessTypeMapper:
     @staticmethod
     def to_domain(model: BusinessTypeModel) -> BusinessType:
-        # parent и children будут подставлены позже
-        bt = BusinessType(
+        return BusinessType(
             id_=BusinessTypeId(model.id),
             name=BusinessName(model.name),
             parent=None,
             children=[],
         )
-        return bt
 
     @staticmethod
     def attach_relations(
         domain_bt: BusinessType, model: BusinessTypeModel, cache: dict
     ):
-        # Attach parent using domain logic
+        # parent
         if model.parent_id:
             parent = cache.get(model.parent_id)
             domain_bt.set_parent(parent)
 
-        # Attach children using domain logic
+        # children
         for child_model in model.children:
             child = cache[child_model.id]
             domain_bt.add_child(child)

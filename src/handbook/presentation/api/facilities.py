@@ -1,10 +1,8 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path, status
-
+from fastapi import APIRouter, Depends, Path
 from presentation.dependencies import get_facility_by_id_uc, get_facility_repo
 from presentation.DTOs.facility_dto import FacilityDTO
-from presentation.schemas.error_schema import ErrorResponse
 
 router = APIRouter(prefix="/facilities", tags=["Facilities"])
 
@@ -15,20 +13,16 @@ router = APIRouter(prefix="/facilities", tags=["Facilities"])
     summary="List all facilities",
     description="Returns a complete list of all facilities stored in the system.",
     responses={
-        200: {"description": "List of facilities successfully returned"},
-        500: {"model": ErrorResponse, "description": "Internal server error"},
+        404: {
+            "description": "No facilities found",
+            "content": {
+                "application/json": {"example": {"detail": "No facilities found"}}
+            },
+        },
     },
 )
 async def list_all(repo=Depends(get_facility_repo)):
-    """
-    Retrieve all facilities.
-    """
     facilities = await repo.list_all()
-    if not facilities:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No facilities found",
-        )
 
     return [FacilityDTO.from_domain(f) for f in facilities]
 
@@ -39,9 +33,18 @@ async def list_all(repo=Depends(get_facility_repo)):
     summary="Get facility by ID",
     description="Fetch a single facility by its UUID.",
     responses={
-        200: {"description": "Facility found"},
-        404: {"model": ErrorResponse, "description": "Facility not found"},
-        422: {"model": ErrorResponse, "description": "Invalid UUID format"},
+        404: {
+            "description": "Facility not found",
+            "content": {
+                "application/json": {"example": {"detail": "Facility not found"}}
+            },
+        },
+        422: {
+            "description": "Invalid UUID format",
+            "content": {
+                "application/json": {"example": {"detail": "Invalid UUID format"}}
+            },
+        },
     },
 )
 async def get_facility_by_id(
@@ -52,13 +55,5 @@ async def get_facility_by_id(
     ),
     uc=Depends(get_facility_by_id_uc),
 ):
-    """
-    Retrieve a facility by its unique identifier.
-    """
     facility = await uc.execute(facility_id=facility_id)
-    if not facility:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No facility found",
-        )
     return FacilityDTO.from_domain(facility)

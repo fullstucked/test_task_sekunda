@@ -3,12 +3,22 @@ from fastapi import Depends
 from application.use_cases.business_types.get_bt_by_id import GetBusinessTypeByIdUseCase
 from application.use_cases.facilities.get_facility_by_id import GetFacilityByIdUseCase
 from application.use_cases.orgs.get_org_by_id import GetOrganizationByIdUseCase
-from application.use_cases.orgs.list_orgs_by_bt import ListOrganizationsByBusinessTypeUseCase
-from application.use_cases.orgs.list_orgs_by_bt_rec import ListOrganizationsByBusinessTypeRecursiveUseCase
-from application.use_cases.orgs.list_orgs_by_facility import ListOrganizationsByFacilityUseCase
+from application.use_cases.orgs.list_orgs_by_bt import (
+    ListOrganizationsByBusinessTypeUseCase,
+)
+from application.use_cases.orgs.list_orgs_by_bt_rec import (
+    ListOrganizationsByBusinessTypeRecursiveUseCase,
+)
+from application.use_cases.orgs.list_orgs_by_facility import (
+    ListOrganizationsByFacilityUseCase,
+)
 from application.use_cases.orgs.list_orgs_by_rad import ListOrganizationsInRadiusUseCase
-from application.use_cases.orgs.list_orgs_in_rect import ListOrganizationsInRectangleUseCase
-from application.use_cases.orgs.search_org_by_name import SearchOrganizationByNameUseCase
+from application.use_cases.orgs.list_orgs_in_rect import (
+    ListOrganizationsInRectangleUseCase,
+)
+from application.use_cases.orgs.search_org_by_name import (
+    SearchOrganizationByNameUseCase,
+)
 from infra.db.dependency import (
     get_bt_repo,
     get_facility_repo,

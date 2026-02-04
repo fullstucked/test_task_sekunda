@@ -7,5 +7,5 @@ class SearchByNameQuery(BaseModel):
     q: str = Field(
         ...,
         description="Substring to search for in organization names.",
-        example="coffee",
+        json_schema_extra={"example": "coffee"},
     )

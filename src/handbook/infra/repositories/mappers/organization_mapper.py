@@ -16,7 +16,6 @@ class OrganizationMapper:
 
         business_types = [BusinessTypeMapper.to_domain(bt) for bt in model.activities]
 
-        # второй проход для BT
         bt_cache = {bt.id_.value: bt for bt in business_types}
         for bt_model in model.activities:
             BusinessTypeMapper.attach_relations(
@@ -28,7 +27,7 @@ class OrganizationMapper:
             name=OrganizationName(model.name),
             phone_numbers=[PhoneNumber(p.phone_number) for p in model.phone_numbers],
             facility=facility,
-            business=business_types,
+            business_types=business_types,
         )
 
     @staticmethod
@@ -36,7 +35,6 @@ class OrganizationMapper:
         model = OrganizationModel(
             id=entity.id_.value,
             name=entity.name.value,
-            type=entity.type.value,
             facility_id=entity.facility.id_.value,
         )
 
@@ -46,7 +44,12 @@ class OrganizationMapper:
         ]
 
         model.activities = [
-            BusinessTypeModel(id=bt.id_.value) for bt in entity.business_types
+            BusinessTypeModel(
+                id=bt.id_.value,
+                name=bt.name.value,
+                parent_id=bt.parent.id_.value if bt.parent else None,
+            )
+            for bt in entity.business_types
         ]
 
         return model

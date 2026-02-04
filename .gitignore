@@ -13,7 +13,7 @@ wheels/
 # Local dev files
 pyrefly.toml
 docs/
-tests/
+# tests/
 scripts/init_db.sh
 scripts/tree.sh
 .env

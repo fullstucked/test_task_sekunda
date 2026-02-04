@@ -10,7 +10,6 @@ from infra.db.base import Base
 class BusinessTypeClosureModel(Base):
     __tablename__ = "business_type_closure"
 
-    # __table_args__ = {'extend_existing': True}  # Allow redefinition
     ancestor_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("business_type.id", ondelete="CASCADE"),
